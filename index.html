@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VCP Screener · US Markets</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=JetBrains+Mono:wght@400;500;700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0d;
+    --bg-elevated: #131318;
+    --bg-row: #0f0f13;
+    --bg-row-hover: #1a1a22;
+    --border: #25252d;
+    --border-subtle: #1a1a22;
+    --text: #f0ede4;
+    --text-muted: #7a7a82;
+    --text-faint: #4a4a52;
+    --accent-setup: #f0c674;
+    --accent-breakout: #00d6a6;
+    --accent-extended: #e08a4a;
+    --accent-basing: #6a9bd6;
+    --accent-fail: #c7515a;
+    --serif: 'Fraunces', Georgia, serif;
+    --sans: 'Manrope', -apple-system, sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { background: var(--bg); }
+
+  body {
+    font-family: var(--sans);
+    color: var(--text);
+    background:
+      radial-gradient(ellipse at top left, rgba(0, 214, 166, 0.04), transparent 60%),
+      radial-gradient(ellipse at bottom right, rgba(240, 198, 116, 0.03), transparent 60%),
+      var(--bg);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .grain {
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.5;
+  }
+
+  .container { max-width: 1600px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+
+  /* ---------- header ---------- */
+  header {
+    padding: 64px 0 40px;
+    border-bottom: 1px solid var(--border-subtle);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 32px;
+  }
+
+  .brand {
+    display: flex; align-items: baseline; gap: 16px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.18em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .brand::before { content: ""; width: 24px; height: 1px; background: var(--accent-breakout); }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: 300;
+    font-size: clamp(48px, 7vw, 88px);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    font-variation-settings: "opsz" 144, "SOFT" 100;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 300;
+    color: var(--accent-breakout);
+  }
+
+  .meta {
+    text-align: right;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+  .meta .updated {
+    color: var(--text);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  /* ---------- stats ---------- */
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .stat {
+    padding: 28px 24px 28px 0;
+    border-right: 1px solid var(--border-subtle);
+  }
+  .stat:last-child { border-right: none; }
+  .stat:not(:first-child) { padding-left: 24px; }
+  .stat .label {
+    font-family: var(--mono);
+    font-size: 10px; letter-spacing: 0.15em;
+    color: var(--text-muted); text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .stat .value {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 40px;
+    line-height: 1;
+    font-variation-settings: "opsz" 144;
+  }
+  .stat.breakout .value { color: var(--accent-breakout); }
+  .stat.setup    .value { color: var(--accent-setup); }
+  .stat.basing   .value { color: var(--accent-basing); }
+  .stat.extended .value { color: var(--accent-extended); }
+
+  /* ---------- filters ---------- */
+  .controls {
+    padding: 28px 0;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+  .chip {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border-radius: 0;
+  }
+  .chip:hover { color: var(--text); border-color: var(--text-muted); }
+  .chip.active {
+    background: var(--text);
+    color: var(--bg);
+    border-color: var(--text);
+  }
+  .chip[data-status="BREAKOUT"].active { background: var(--accent-breakout); border-color: var(--accent-breakout); }
+  .chip[data-status="SETUP"].active    { background: var(--accent-setup);    border-color: var(--accent-setup); }
+  .chip[data-status="BASING"].active   { background: var(--accent-basing);   border-color: var(--accent-basing); }
+  .chip[data-status="EXTENDED"].active { background: var(--accent-extended); border-color: var(--accent-extended); }
+
+  .search {
+    margin-left: auto;
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    width: 220px;
+    outline: none;
+  }
+  .search:focus { border-color: var(--accent-breakout); }
+  .search::placeholder { color: var(--text-faint); letter-spacing: 0.1em; text-transform: uppercase; font-size: 10px; }
+
+  /* ---------- table ---------- */
+  .table-wrap {
+    margin: 0 -32px;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  thead th {
+    position: sticky; top: 0;
+    background: var(--bg);
+    text-align: right;
+    padding: 16px 14px;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    font-family: var(--sans);
+    font-weight: 600;
+  }
+  thead th:first-child, tbody td:first-child { padding-left: 32px; }
+  thead th:last-child,  tbody td:last-child  { padding-right: 32px; }
+  thead th.sticky-left, tbody td.sticky-left {
+    text-align: left;
+  }
+  thead th:hover { color: var(--text); }
+  thead th .arrow {
+    display: inline-block; margin-left: 4px;
+    color: var(--text-faint); font-size: 9px;
+  }
+  thead th.sort-asc .arrow,
+  thead th.sort-desc .arrow { color: var(--accent-breakout); }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border-subtle);
+    transition: background 0.1s ease;
+  }
+  tbody tr:hover { background: var(--bg-row-hover); }
+
+  tbody td {
+    padding: 14px;
+    text-align: right;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  /* status pill */
+  .pill {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 3px 8px;
+    border: 1px solid;
+    text-transform: uppercase;
+  }
+  .pill.BREAKOUT { color: var(--accent-breakout); border-color: var(--accent-breakout); }
+  .pill.SETUP    { color: var(--accent-setup);    border-color: var(--accent-setup); }
+  .pill.BASING   { color: var(--accent-basing);   border-color: var(--accent-basing); }
+  .pill.EXTENDED { color: var(--accent-extended); border-color: var(--accent-extended); }
+
+  .symbol {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: left;
+  }
+  .symbol a {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .symbol a:hover { color: var(--accent-breakout); }
+  .symbol .name {
+    font-family: var(--sans);
+    font-size: 11px;
+    color: var(--text-muted);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 240px;
+  }
+
+  .num.pos { color: var(--accent-breakout); }
+  .num.neg { color: var(--accent-fail); }
+
+  .empty {
+    padding: 80px 32px;
+    text-align: center;
+    font-family: var(--serif);
+    font-size: 24px;
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  /* footer */
+  footer {
+    padding: 48px 0 64px;
+    margin-top: 32px;
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text-muted);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  @media (max-width: 720px) {
+    .container { padding: 0 20px; }
+    header { grid-template-columns: 1fr; padding: 40px 0 24px; }
+    .meta { text-align: left; }
+    .stats { grid-template-columns: repeat(2, 1fr); }
+    .stat { border-right: none; border-bottom: 1px solid var(--border-subtle); padding: 20px 0 !important; }
+    .search { margin-left: 0; width: 100%; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<div class="container">
+
+  <header>
+    <div>
+      <div class="brand">VCP Screener · US Markets</div>
+      <h1>Stage 2 &amp; <em>contracting.</em></h1>
+    </div>
+    <div class="meta">
+      <div class="updated">Apr 26, 2026 · 01:40</div>
+      <div>COMBINED · 38 candidates</div>
+    </div>
+  </header>
+
+  <section class="stats">
+    <div class="stat breakout"><div class="label">Breakout</div><div class="value" id="ct-breakout">0</div></div>
+    <div class="stat setup"><div class="label">Setup</div><div class="value" id="ct-setup">0</div></div>
+    <div class="stat basing"><div class="label">Basing</div><div class="value" id="ct-basing">0</div></div>
+    <div class="stat extended"><div class="label">Extended</div><div class="value" id="ct-extended">0</div></div>
+    <div class="stat"><div class="label">Total</div><div class="value" id="ct-total">0</div></div>
+  </section>
+
+  <section class="controls">
+    <button class="chip active" data-status="ALL">All</button>
+    <button class="chip" data-status="BREAKOUT">Breakout</button>
+    <button class="chip" data-status="SETUP">Setup</button>
+    <button class="chip" data-status="BASING">Basing</button>
+    <button class="chip" data-status="EXTENDED">Extended</button>
+    <input class="search" id="search" placeholder="Search ticker or sector" type="text">
+  </section>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr id="thead-row"></tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>
+    <div>Built on Minervini SEPA logic · yfinance data · not financial advice</div>
+    <div>Click ticker → TradingView chart</div>
+  </footer>
+
+</div>
+
+<script>
+const DATA = [{"symbol": "GEV", "status": "BREAKOUT", "price": 1149.19, "pivot": 1181.95, "pct_from_pivot": -2.77, "base_depth": 42.4, "tightness": 18.0, "vol_du": 96.0, "rs_ratio": 1.67, "pct_from_high52": 2.8, "pct_from_low52": 222.7, "sma50": 896.21, "sma200": 694.65, "stop": 1068.75, "t1": 1310.08, "t2": 1390.52, "days_since_breakout": 3, "name": "GE Vernova Inc.", "sector": "Industrials", "market_cap": 308810317824, "pe": 33.55299, "market_cap_fmt": "$308.8B"}, {"symbol": "ON", "status": "BREAKOUT", "price": 98.4, "pivot": 99.19, "pct_from_pivot": -0.8, "base_depth": 45.2, "tightness": 31.4, "vol_du": 136.0, "rs_ratio": 1.56, "pct_from_high52": 1.9, "pct_from_low52": 164.6, "sma50": 67.72, "sma200": 57.19, "stop": 91.51, "t1": 112.18, "t2": 119.06, "days_since_breakout": 7, "name": "ON Semiconductor Corporation", "sector": "Technology", "market_cap": 38703411200, "pe": 339.31036, "market_cap_fmt": "$38.7B"}, {"symbol": "CSX", "status": "BREAKOUT", "price": 45.41, "pivot": 46.55, "pct_from_pivot": -2.45, "base_depth": 20.3, "tightness": 10.3, "vol_du": 93.0, "rs_ratio": 1.18, "pct_from_high52": 2.4, "pct_from_low52": 67.5, "sma50": 41.4, "sma200": 36.78, "stop": 42.23, "t1": 51.77, "t2": 54.95, "days_since_breakout": 2, "name": "CSX Corporation", "sector": "Industrials", "market_cap": 84378083328, "pe": 27.858896, "market_cap_fmt": "$84.4B"}, {"symbol": "JBHT", "status": "BREAKOUT", "price": 248.59, "pivot": 256.18, "pct_from_pivot": -2.96, "base_depth": 24.3, "tightness": 13.3, "vol_du": 116.0, "rs_ratio": 1.18, "pct_from_high52": 3.0, "pct_from_low52": 99.4, "sma50": 221.1, "sma200": 180.71, "stop": 231.19, "t1": 283.39, "t2": 300.79, "days_since_breakout": 7, "name": "J.B. Hunt Transport Services, I", "sector": "Industrials", "market_cap": 23517628416, "pe": 38.60093, "market_cap_fmt": "$23.5B"}, {"symbol": "STT", "status": "BREAKOUT", "price": 150.74, "pivot": 156.18, "pct_from_pivot": -3.48, "base_depth": 26.1, "tightness": 11.7, "vol_du": 124.0, "rs_ratio": 1.15, "pct_from_high52": 3.5, "pct_from_low52": 80.9, "sma50": 130.26, "sma200": 120.37, "stop": 140.19, "t1": 171.84, "t2": 182.4, "days_since_breakout": 6, "name": "State Street Corporation", "sector": "Financial Services", "market_cap": 42015494144, "pe": 15.319106, "market_cap_fmt": "$42.0B"}, {"symbol": "UNP", "status": "BREAKOUT", "price": 268.7, "pivot": 271.26, "pct_from_pivot": -0.94, "base_depth": 17.5, "tightness": 10.2, "vol_du": 109.0, "rs_ratio": 1.13, "pct_from_high52": 2.2, "pct_from_low52": 30.6, "sma50": 251.84, "sma200": 232.26, "stop": 249.89, "t1": 306.32, "t2": 325.13, "days_since_breakout": 2, "name": "Union Pacific Corporation", "sector": "Industrials", "market_cap": 159530745856, "pe": 22.115229, "market_cap_fmt": "$159.5B"}, {"symbol": "NEE", "status": "BREAKOUT", "price": 95.28, "pivot": 96.7, "pct_from_pivot": -1.47, "base_depth": 12.3, "tightness": 7.9, "vol_du": 92.0, "rs_ratio": 1.09, "pct_from_high52": 2.4, "pct_from_low52": 53.6, "sma50": 92.28, "sma200": 81.91, "stop": 89.9, "t1": 106.04, "t2": 111.42, "days_since_breakout": 2, "name": "NextEra Energy, Inc.", "sector": "Utilities", "market_cap": 198691323904, "pe": 24.182741, "market_cap_fmt": "$198.7B"}, {"symbol": "NTRS", "status": "BREAKOUT", "price": 164.01, "pivot": 173.19, "pct_from_pivot": -5.3, "base_depth": 23.3, "tightness": 13.0, "vol_du": 112.0, "rs_ratio": 1.07, "pct_from_high52": 5.3, "pct_from_low52": 84.2, "sma50": 145.44, "sma200": 135.23, "stop": 152.53, "t1": 186.97, "t2": 198.45, "days_since_breakout": 4, "name": "Northern Trust Corporation", "sector": "Financial Services", "market_cap": 30394484736, "pe": 17.17382, "market_cap_fmt": "$30.4B"}, {"symbol": "DOV", "status": "BREAKOUT", "price": 224.78, "pivot": 232.71, "pct_from_pivot": -3.41, "base_depth": 16.7, "tightness": 8.9, "vol_du": 99.0, "rs_ratio": 1.05, "pct_from_high52": 5.2, "pct_from_low52": 42.1, "sma50": 217.28, "sma200": 192.98, "stop": 212.04, "t1": 250.26, "t2": 263.0, "days_since_breakout": 2, "name": "Dover Corporation", "sector": "Industrials", "market_cap": 30269190144, "pe": 28.0975, "market_cap_fmt": "$30.3B"}, {"symbol": "CINF", "status": "BREAKOUT", "price": 164.48, "pivot": 168.78, "pct_from_pivot": -2.55, "base_depth": 11.5, "tightness": 4.5, "vol_du": 103.0, "rs_ratio": 1.01, "pct_from_high52": 5.1, "pct_from_low52": 27.3, "sma50": 162.25, "sma200": 157.95, "stop": 160.75, "t1": 171.94, "t2": 175.67, "days_since_breakout": 6, "name": "Cincinnati Financial Corporatio", "sector": "Financial Services", "market_cap": 25607266304, "pe": 10.842452, "market_cap_fmt": "$25.6B"}, {"symbol": "TRGP", "status": "SETUP", "price": 240.69, "pivot": 245.72, "pct_from_pivot": -2.05, "base_depth": 23.1, "tightness": 6.2, "vol_du": 79.0, "rs_ratio": 1.22, "pct_from_high52": 5.2, "pct_from_low52": 68.9, "sma50": 238.2, "sma200": 187.53, "stop": 230.38, "t1": 261.31, "t2": 271.62, "days_since_breakout": null, "name": "Targa Resources, Inc.", "sector": "Energy", "market_cap": 51736748032, "pe": 28.316471, "market_cap_fmt": "$51.7B"}, {"symbol": "JCI", "status": "SETUP", "price": 141.92, "pivot": 143.14, "pct_from_pivot": -0.85, "base_depth": 19.3, "tightness": 5.6, "vol_du": 80.0, "rs_ratio": 1.2, "pct_from_high52": 2.8, "pct_from_low52": 78.6, "sma50": 137.31, "sma200": 118.67, "stop": 135.1, "t1": 155.56, "t2": 162.38, "days_since_breakout": null, "name": "Johnson Controls International ", "sector": "Industrials", "market_cap": 86864429056, "pe": 47.62416, "market_cap_fmt": "$86.9B"}, {"symbol": "ROST", "status": "SETUP", "price": 226.37, "pivot": 230.44, "pct_from_pivot": -1.77, "base_depth": 20.0, "tightness": 4.9, "vol_du": 78.0, "rs_ratio": 1.17, "pct_from_high52": 1.8, "pct_from_low52": 83.1, "sma50": 212.65, "sma200": 174.35, "stop": 219.08, "t1": 240.95, "t2": 248.24, "days_since_breakout": null, "name": "Ross Stores, Inc.", "sector": "Consumer Cyclical", "market_cap": 73218228224, "pe": 34.246593, "market_cap_fmt": "$73.2B"}, {"symbol": "PSX", "status": "SETUP", "price": 162.85, "pivot": 165.03, "pct_from_pivot": -1.32, "base_depth": 27.1, "tightness": 6.9, "vol_du": 77.0, "rs_ratio": 1.13, "pct_from_high52": 14.6, "pct_from_low52": 66.3, "sma50": 166.13, "sma200": 140.47, "stop": 153.58, "t1": 181.39, "t2": 190.66, "days_since_breakout": null, "name": "Phillips 66", "sector": "Energy", "market_cap": 65300017152, "pe": 15.078704, "market_cap_fmt": "$65.3B"}, {"symbol": "AEP", "status": "SETUP", "price": 134.73, "pivot": 137.72, "pct_from_pivot": -2.17, "base_depth": 15.0, "tightness": 4.0, "vol_du": 72.0, "rs_ratio": 1.11, "pct_from_high52": 2.2, "pct_from_low52": 41.6, "sma50": 131.89, "sma200": 118.09, "stop": 131.2, "t1": 141.79, "t2": 145.32, "days_since_breakout": null, "name": "American Electric Power Company", "sector": "Utilities", "market_cap": 73234300928, "pe": 20.229729, "market_cap_fmt": "$73.2B"}, {"symbol": "KIM", "status": "SETUP", "price": 23.69, "pivot": 24.31, "pct_from_pivot": -2.55, "base_depth": 17.1, "tightness": 5.5, "vol_du": 74.0, "rs_ratio": 1.11, "pct_from_high52": 2.6, "pct_from_low52": 26.8, "sma50": 23.01, "sma200": 21.28, "stop": 22.97, "t1": 25.13, "t2": 25.85, "days_since_breakout": null, "name": "Kimco Realty Corporation (HC)", "sector": "Real Estate", "market_cap": 15976611840, "pe": 28.890245, "market_cap_fmt": "$16.0B"}, {"symbol": "WELL", "status": "SETUP", "price": 208.75, "pivot": 214.99, "pct_from_pivot": -2.9, "base_depth": 16.2, "tightness": 7.5, "vol_du": 83.0, "rs_ratio": 1.1, "pct_from_high52": 3.2, "pct_from_low52": 48.4, "sma50": 205.63, "sma200": 184.75, "stop": 198.88, "t1": 228.49, "t2": 238.36, "days_since_breakout": null, "name": "Welltower Inc.", "sector": "Real Estate", "market_cap": 147070746624, "pe": 147.00705, "market_cap_fmt": "$147.1B"}, {"symbol": "WMB", "status": "SETUP", "price": 72.18, "pivot": 73.05, "pct_from_pivot": -1.19, "base_depth": 14.7, "tightness": 5.1, "vol_du": 84.0, "rs_ratio": 1.09, "pct_from_high52": 5.4, "pct_from_low52": 32.4, "sma50": 72.8, "sma200": 62.85, "stop": 69.33, "t1": 77.88, "t2": 80.73, "days_since_breakout": null, "name": "Williams Companies, Inc. (The)", "sector": "Energy", "market_cap": 88265818112, "pe": 33.72897, "market_cap_fmt": "$88.3B"}, {"symbol": "FTV", "status": "SETUP", "price": 61.09, "pivot": 61.74, "pct_from_pivot": -1.05, "base_depth": 16.0, "tightness": 5.9, "vol_du": 82.0, "rs_ratio": 1.08, "pct_from_high52": 2.0, "pct_from_low52": 32.3, "sma50": 57.37, "sma200": 52.83, "stop": 57.95, "t1": 67.37, "t2": 70.51, "days_since_breakout": null, "name": "Fortive Corporation", "sector": "Technology", "market_cap": 18807117824, "pe": 38.421383, "market_cap_fmt": "$18.8B"}, {"symbol": "BG", "status": "SETUP", "price": 124.9, "pivot": 127.58, "pct_from_pivot": -2.1, "base_depth": 16.9, "tightness": 7.7, "vol_du": 81.0, "rs_ratio": 1.07, "pct_from_high52": 5.3, "pct_from_low52": 78.3, "sma50": 122.88, "sma200": 98.06, "stop": 117.74, "t1": 139.22, "t2": 146.38, "days_since_breakout": null, "name": "Bunge Limited", "sector": "Consumer Defensive", "market_cap": 24206921728, "pe": 25.334686, "market_cap_fmt": "$24.2B"}, {"symbol": "WMT", "status": "SETUP", "price": 129.92, "pivot": 132.46, "pct_from_pivot": -1.92, "base_depth": 13.8, "tightness": 7.5, "vol_du": 82.0, "rs_ratio": 1.07, "pct_from_high52": 3.3, "pct_from_low52": 42.3, "sma50": 125.62, "sma200": 111.18, "stop": 122.55, "t1": 144.66, "t2": 152.03, "days_since_breakout": null, "name": "Walmart Inc.", "sector": "Consumer Defensive", "market_cap": 1035591090176, "pe": 47.58974, "market_cap_fmt": "$1.04T"}, {"symbol": "BMY", "status": "SETUP", "price": 58.71, "pivot": 60.48, "pct_from_pivot": -2.93, "base_depth": 13.8, "tightness": 5.4, "vol_du": 70.0, "rs_ratio": 1.05, "pct_from_high52": 5.7, "pct_from_low52": 41.6, "sma50": 59.28, "sma200": 50.72, "stop": 57.22, "t1": 61.69, "t2": 63.18, "days_since_breakout": null, "name": "Bristol-Myers Squibb Company", "sector": "Healthcare", "market_cap": 119870283776, "pe": 16.968208, "market_cap_fmt": "$119.9B"}, {"symbol": "LNT", "status": "SETUP", "price": 72.31, "pivot": 73.78, "pct_from_pivot": -1.99, "base_depth": 12.7, "tightness": 3.7, "vol_du": 78.0, "rs_ratio": 1.05, "pct_from_high52": 2.8, "pct_from_low52": 25.5, "sma50": 71.61, "sma200": 66.84, "stop": 70.61, "t1": 75.71, "t2": 77.41, "days_since_breakout": null, "name": "Alliant Energy Corporation", "sector": "Utilities", "market_cap": 18675972096, "pe": 23.028662, "market_cap_fmt": "$18.7B"}, {"symbol": "MO", "status": "SETUP", "price": 66.88, "pivot": 67.93, "pct_from_pivot": -1.55, "base_depth": 15.7, "tightness": 5.2, "vol_du": 80.0, "rs_ratio": 1.04, "pct_from_high52": 3.6, "pct_from_low52": 27.7, "sma50": 65.99, "sma200": 61.26, "stop": 64.08, "t1": 72.48, "t2": 75.28, "days_since_breakout": null, "name": "Altria Group, Inc.", "sector": "Consumer Defensive", "market_cap": 111816540160, "pe": 16.23301, "market_cap_fmt": "$111.8B"}, {"symbol": "IEX", "status": "SETUP", "price": 204.74, "pivot": 209.23, "pct_from_pivot": -2.15, "base_depth": 15.7, "tightness": 5.8, "vol_du": 83.0, "rs_ratio": 1.01, "pct_from_high52": 5.7, "pct_from_low52": 31.2, "sma50": 199.08, "sma200": 179.87, "stop": 197.02, "t1": 220.18, "t2": 227.9, "days_since_breakout": null, "name": "IDEX Corporation", "sector": "Industrials", "market_cap": 15221974016, "pe": 31.94072, "market_cap_fmt": "$15.2B"}, {"symbol": "ADM", "status": "SETUP", "price": 69.23, "pivot": 71.14, "pct_from_pivot": -2.68, "base_depth": 16.5, "tightness": 6.9, "vol_du": 78.0, "rs_ratio": 1.0, "pct_from_high52": 6.7, "pct_from_low52": 52.2, "sma50": 69.64, "sma200": 62.12, "stop": 66.06, "t1": 75.57, "t2": 78.74, "days_since_breakout": null, "name": "Archer-Daniels-Midland Company", "sector": "Consumer Defensive", "market_cap": 33361600512, "pe": 31.044844, "market_cap_fmt": "$33.4B"}, {"symbol": "ATO", "status": "BASING", "price": 185.45, "pivot": 192.31, "pct_from_pivot": -3.57, "base_depth": 15.1, "tightness": 4.7, "vol_du": 71.0, "rs_ratio": 1.07, "pct_from_high52": 3.7, "pct_from_low52": 26.4, "sma50": 184.7, "sma200": 170.93, "stop": 181.32, "t1": 193.71, "t2": 197.84, "days_since_breakout": null, "name": "Atmos Energy Corporation", "sector": "Utilities", "market_cap": 30680651776, "pe": 24.147135, "market_cap_fmt": "$30.7B"}, {"symbol": "DE", "status": "BASING", "price": 562.64, "pivot": 619.24, "pct_from_pivot": -9.14, "base_depth": 23.1, "tightness": 7.6, "vol_du": 70.0, "rs_ratio": 1.06, "pct_from_high52": 16.3, "pct_from_low52": 30.8, "sma50": 593.21, "sma200": 511.77, "stop": 564.82, "t1": 562.66, "t2": 562.67, "days_since_breakout": null, "name": "Deere & Company", "sector": "Industrials", "market_cap": 151973167104, "pe": 31.751696, "market_cap_fmt": "$152.0B"}, {"symbol": "KMI", "status": "BASING", "price": 31.74, "pivot": 32.94, "pct_from_pivot": -3.64, "base_depth": 15.2, "tightness": 5.9, "vol_du": 95.0, "rs_ratio": 1.06, "pct_from_high52": 8.6, "pct_from_low52": 26.2, "sma50": 32.89, "sma200": 28.5, "stop": 30.92, "t1": 33.38, "t2": 34.2, "days_since_breakout": null, "name": "Kinder Morgan, Inc.", "sector": "Energy", "market_cap": 70615752704, "pe": 21.302013, "market_cap_fmt": "$70.6B"}, {"symbol": "SRE", "status": "BASING", "price": 93.2, "pivot": 100.16, "pct_from_pivot": -6.95, "base_depth": 15.8, "tightness": 6.7, "vol_du": 97.0, "rs_ratio": 1.05, "pct_from_high52": 7.8, "pct_from_low52": 31.6, "sma50": 94.69, "sma200": 87.85, "stop": 92.18, "t1": 95.24, "t2": 96.26, "days_since_breakout": null, "name": "DBA Sempra", "sector": "Utilities", "market_cap": 60890591232, "pe": 33.890907, "market_cap_fmt": "$60.9B"}, {"symbol": "BALL", "status": "BASING", "price": 61.32, "pivot": 65.36, "pct_from_pivot": -6.18, "base_depth": 18.1, "tightness": 6.6, "vol_du": 111.0, "rs_ratio": 1.04, "pct_from_high52": 9.9, "pct_from_low52": 37.7, "sma50": 62.71, "sma200": 54.87, "stop": 61.6, "t1": 61.34, "t2": 61.35, "days_since_breakout": null, "name": "Ball Corporation", "sector": "Consumer Cyclical", "market_cap": 16320504832, "pe": 18.581818, "market_cap_fmt": "$16.3B"}, {"symbol": "EVRG", "status": "BASING", "price": 81.23, "pivot": 84.67, "pct_from_pivot": -4.06, "base_depth": 12.0, "tightness": 5.4, "vol_du": 83.0, "rs_ratio": 1.03, "pct_from_high52": 4.7, "pct_from_low52": 33.2, "sma50": 81.71, "sma200": 75.15, "stop": 79.21, "t1": 85.27, "t2": 87.29, "days_since_breakout": null, "name": "Evergy, Inc.", "sector": "Utilities", "market_cap": 18705981440, "pe": 22.193989, "market_cap_fmt": "$18.7B"}, {"symbol": "FE", "status": "BASING", "price": 49.41, "pivot": 52.0, "pct_from_pivot": -4.98, "base_depth": 12.8, "tightness": 6.3, "vol_du": 102.0, "rs_ratio": 1.03, "pct_from_high52": 5.6, "pct_from_low52": 29.6, "sma50": 50.33, "sma200": 45.71, "stop": 48.25, "t1": 51.73, "t2": 52.89, "days_since_breakout": null, "name": "FirstEnergy Corp.", "sector": "Utilities", "market_cap": 28578676736, "pe": 28.073864, "market_cap_fmt": "$28.6B"}, {"symbol": "DD", "status": "BASING", "price": 46.33, "pivot": 48.08, "pct_from_pivot": -3.64, "base_depth": 19.8, "tightness": 5.0, "vol_du": 72.0, "rs_ratio": 1.02, "pct_from_high52": 11.7, "pct_from_low52": 76.7, "sma50": 46.95, "sma200": 38.88, "stop": 45.66, "t1": 47.67, "t2": 48.34, "days_since_breakout": null, "name": "DuPont de Nemours, Inc.", "sector": "Basic Materials", "market_cap": 18989611008, "pe": 220.61906, "market_cap_fmt": "$19.0B"}, {"symbol": "TJX", "status": "BASING", "price": 157.03, "pivot": 164.95, "pct_from_pivot": -4.8, "base_depth": 12.3, "tightness": 3.6, "vol_du": 84.0, "rs_ratio": 1.02, "pct_from_high52": 5.3, "pct_from_low52": 32.2, "sma50": 158.32, "sma200": 146.66, "stop": 156.42, "t1": 158.25, "t2": 158.86, "days_since_breakout": null, "name": "TJX Companies, Inc. (The)", "sector": "Consumer Cyclical", "market_cap": 174376648704, "pe": 32.244354, "market_cap_fmt": "$174.4B"}, {"symbol": "PFE", "status": "BASING", "price": 27.0, "pivot": 27.85, "pct_from_pivot": -3.05, "base_depth": 12.1, "tightness": 5.3, "vol_du": 81.0, "rs_ratio": 1.01, "pct_from_high52": 6.1, "pct_from_low52": 29.3, "sma50": 27.21, "sma200": 25.17, "stop": 26.38, "t1": 28.24, "t2": 28.86, "days_since_breakout": null, "name": "Pfizer, Inc.", "sector": "Healthcare", "market_cap": 153585614848, "pe": 19.852942, "market_cap_fmt": "$153.6B"}, {"symbol": "INTC", "status": "EXTENDED", "price": 82.54, "pivot": 70.33, "pct_from_pivot": 17.36, "base_depth": 52.3, "tightness": 27.1, "vol_du": 115.0, "rs_ratio": 1.88, "pct_from_high52": 3.1, "pct_from_low52": 335.1, "sma50": 51.03, "sma200": 38.45, "stop": 76.76, "t1": 94.1, "t2": 99.87, "days_since_breakout": 1, "name": "Intel Corporation", "sector": "Technology", "market_cap": 414846025728, "pe": 59.38258, "market_cap_fmt": "$414.8B"}, {"symbol": "BKR", "status": "EXTENDED", "price": 68.94, "pivot": 65.56, "pct_from_pivot": 5.16, "base_depth": 22.9, "tightness": 16.4, "vol_du": 87.0, "rs_ratio": 1.19, "pct_from_high52": 1.3, "pct_from_low52": 103.5, "sma50": 61.34, "sma200": 50.76, "stop": 64.11, "t1": 78.59, "t2": 83.42, "days_since_breakout": 1, "name": "Baker Hughes Company", "sector": "Energy", "market_cap": 68371755008, "pe": 22.025558, "market_cap_fmt": "$68.4B"}];
+
+const COLUMNS = [
+  { key: 'status',          label: 'Status',     type: 'status', sticky: true },
+  { key: 'symbol',          label: 'Ticker',     type: 'symbol' },
+  { key: 'sector',          label: 'Sector',     type: 'text' },
+  { key: 'price',           label: 'Price',      type: 'price' },
+  { key: 'market_cap',      label: 'Mkt Cap',    type: 'mcap' },
+  { key: 'pe',              label: 'P/E',        type: 'pe' },
+  { key: 'pivot',           label: 'Pivot',      type: 'price' },
+  { key: 'pct_from_pivot',  label: '% Pivot',    type: 'pct' },
+  { key: 'base_depth',      label: 'Base %',     type: 'num' },
+  { key: 'tightness',       label: 'Tight %',    type: 'num' },
+  { key: 'vol_du',          label: 'Vol DU',     type: 'num' },
+  { key: 'rs_ratio',        label: 'RS',         type: 'rs' },
+  { key: 'pct_from_high52', label: 'Off 52H',    type: 'num' },
+  { key: 'stop',            label: 'Stop',       type: 'price' },
+  { key: 't1',              label: 'T1 (2R)',    type: 'price' },
+  { key: 't2',              label: 'T2 (3R)',    type: 'price' },
+];
+
+let state = {
+  data: DATA.slice(),
+  filterStatus: 'ALL',
+  search: '',
+  sortKey: null,
+  sortDir: 'desc',
+};
+
+function updateCounts() {
+  const counts = { BREAKOUT: 0, SETUP: 0, BASING: 0, EXTENDED: 0 };
+  for (const r of DATA) counts[r.status] = (counts[r.status] || 0) + 1;
+  document.getElementById('ct-breakout').textContent = counts.BREAKOUT;
+  document.getElementById('ct-setup').textContent    = counts.SETUP;
+  document.getElementById('ct-basing').textContent   = counts.BASING;
+  document.getElementById('ct-extended').textContent = counts.EXTENDED;
+  document.getElementById('ct-total').textContent    = DATA.length;
+}
+
+function buildHead() {
+  const tr = document.getElementById('thead-row');
+  tr.innerHTML = '';
+  COLUMNS.forEach(col => {
+    const th = document.createElement('th');
+    th.dataset.key = col.key;
+    if (col.sticky) th.classList.add('sticky-left');
+    th.innerHTML = col.label + ' <span class="arrow">●</span>';
+    th.addEventListener('click', () => {
+      if (state.sortKey === col.key) {
+        state.sortDir = state.sortDir === 'asc' ? 'desc' : 'asc';
+      } else {
+        state.sortKey = col.key;
+        state.sortDir = 'desc';
+      }
+      render();
+    });
+    tr.appendChild(th);
+  });
+}
+
+function fmtPrice(v) { return v == null ? '—' : '$' + Number(v).toFixed(2); }
+function fmtNum(v)   { return v == null ? '—' : Number(v).toFixed(1); }
+function fmtPct(v)   {
+  if (v == null) return '—';
+  const n = Number(v);
+  const sign = n > 0 ? '+' : '';
+  return sign + n.toFixed(2) + '%';
+}
+function fmtMcap(v)  {
+  if (!v) return '—';
+  if (v >= 1e12) return '$' + (v/1e12).toFixed(2) + 'T';
+  if (v >= 1e9)  return '$' + (v/1e9).toFixed(1)  + 'B';
+  if (v >= 1e6)  return '$' + (v/1e6).toFixed(0)  + 'M';
+  return '$' + Math.round(v).toLocaleString();
+}
+function fmtPE(v)    { return v == null ? '—' : Number(v).toFixed(1); }
+
+function buildRow(r) {
+  const tr = document.createElement('tr');
+  COLUMNS.forEach(col => {
+    const td = document.createElement('td');
+    if (col.sticky) td.classList.add('sticky-left');
+    const v = r[col.key];
+
+    switch (col.type) {
+      case 'status':
+        td.innerHTML = `<span class="pill ${v}">${v}</span>`;
+        break;
+      case 'symbol':
+        td.classList.remove('sticky-left');
+        td.style.textAlign = 'left';
+        td.innerHTML = `<div class="symbol">
+            <a href="https://www.tradingview.com/chart/?symbol=${r.symbol}" target="_blank" rel="noopener">${r.symbol}</a>
+            <span class="name">${r.name || ''}</span></div>`;
+        break;
+      case 'text':
+        td.style.textAlign = 'left';
+        td.style.color = 'var(--text-muted)';
+        td.textContent = v || '—';
+        break;
+      case 'price':  td.textContent = fmtPrice(v); break;
+      case 'num':    td.textContent = fmtNum(v); break;
+      case 'pct':
+        td.textContent = fmtPct(v);
+        td.classList.add('num');
+        if (v > 0) td.classList.add('pos');
+        else if (v < 0) td.classList.add('neg');
+        break;
+      case 'mcap':   td.textContent = fmtMcap(v); break;
+      case 'pe':     td.textContent = fmtPE(v); break;
+      case 'rs':
+        td.textContent = v == null ? '—' : Number(v).toFixed(2) + '×';
+        if (v >= 1.5) td.style.color = 'var(--accent-breakout)';
+        break;
+    }
+    tr.appendChild(td);
+  });
+  return tr;
+}
+
+function applyFilters() {
+  let rows = DATA.slice();
+  if (state.filterStatus !== 'ALL') {
+    rows = rows.filter(r => r.status === state.filterStatus);
+  }
+  if (state.search) {
+    const q = state.search.toLowerCase();
+    rows = rows.filter(r =>
+      (r.symbol  || '').toLowerCase().includes(q) ||
+      (r.name    || '').toLowerCase().includes(q) ||
+      (r.sector  || '').toLowerCase().includes(q));
+  }
+  if (state.sortKey) {
+    const k = state.sortKey;
+    const dir = state.sortDir === 'asc' ? 1 : -1;
+    rows.sort((a, b) => {
+      const av = a[k], bv = b[k];
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (typeof av === 'number') return (av - bv) * dir;
+      return String(av).localeCompare(String(bv)) * dir;
+    });
+  }
+  return rows;
+}
+
+function render() {
+  const rows = applyFilters();
+  const tbody = document.getElementById('tbody');
+  tbody.innerHTML = '';
+  if (rows.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="${COLUMNS.length}" class="empty">No candidates match your filters.</td></tr>`;
+  } else {
+    rows.forEach(r => tbody.appendChild(buildRow(r)));
+  }
+  // sort indicators
+  document.querySelectorAll('thead th').forEach(th => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    th.querySelector('.arrow').textContent = '●';
+    if (th.dataset.key === state.sortKey) {
+      th.classList.add('sort-' + state.sortDir);
+      th.querySelector('.arrow').textContent = state.sortDir === 'asc' ? '▲' : '▼';
+    }
+  });
+}
+
+document.querySelectorAll('.chip').forEach(c => {
+  c.addEventListener('click', () => {
+    document.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+    c.classList.add('active');
+    state.filterStatus = c.dataset.status;
+    render();
+  });
+});
+document.getElementById('search').addEventListener('input', e => {
+  state.search = e.target.value;
+  render();
+});
+
+updateCounts();
+buildHead();
+render();
+</script>
+
+</body>
+</html>
